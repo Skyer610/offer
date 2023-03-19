@@ -1,0 +1,671 @@
+# 2.27
+###  快速排序
+n个元素 平均时间复杂度nlog(n)
+基于==分治==的排序
+快速排序 以某一元素为基准，划分为两个数组
+==划分==算法
+ 基于左右两个指针同时扫描
+
+### 剑指 Offer 09. 用两个栈实现队列
+用两个栈实现一个队列。队列的声明如下，请实现它的两个函数 appendTail 和 deleteHead ，分别完成在队列尾部插入整数和在队列头部删除整数的功能。(若队列中没有元素，deleteHead 操作返回 -1 )
+
+ 
+```
+示例 1：
+
+输入：
+["CQueue","appendTail","deleteHead","deleteHead","deleteHead"]
+[[],[3],[],[],[]]
+输出：[null,null,3,-1,-1]
+示例 2：
+
+输入：
+["CQueue","deleteHead","appendTail","appendTail","deleteHead","deleteHead"]
+[[],[],[5],[2],[],[]]
+输出：[null,-1,null,null,5,2]
+
+```
+![avatar](https://pic.leetcode-cn.com/966aebd484002e620d88676847273a061ab9ab6d863ab5079ab347a643461e24-09.gif)
+```C++
+class CQueue {
+public:
+     stack<int> stack1;
+     stack<int> stack2;
+
+    CQueue() {
+
+    }
+    
+    void appendTail(int value) {
+        stack1.push(value);
+    }
+    
+    int deleteHead() {
+        if(stack1.empty()) return -1;
+        while(!stack1.empty()){
+            int temp = stack1.top();
+            stack2.push(temp);
+            stack1.pop();
+        }
+        int res = stack2.top();
+        stack2.pop();
+        while(!stack2.empty()){
+            int temp = stack2.top();
+            stack1.push(temp);
+            stack2.pop();
+        }
+        return res;
+    }
+};
+```
+双堆栈结构 只使用一个栈 stack1 当作队列，另一个栈 stack2 用来辅助操作。
+
+要想将新加入的元素出现栈底，需要先将 stack1 的元素转移到 stack2，将元素入栈 stack1，最后将 stack2 的元素全部回到 stack1。
+
+stack 堆栈结构，stack.push(value)放入元素 .pop 删除栈顶元素
+
+### 剑指 Offer 30. 包含min函数的栈
+定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的 min 函数在该栈中，调用 min、push 及 pop 的时间复杂度都是 O(1)。
+
+ 
+```
+示例:
+
+MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.min();   --> 返回 -3.
+minStack.pop();
+minStack.top();      --> 返回 0.
+minStack.min();   --> 返回 -2.
+```
+```c++
+class MinStack {
+public:
+    /** initialize your data structure here. */
+        stack<int> stack_x;
+        stack<int> min_stack;
+    MinStack() {
+        min_stack.push(INT_MAX);
+    }
+    
+    void push(int x) {
+        stack_x.push(x);
+        min_stack.push(::min (min_stack.top(), x));
+
+    }
+    
+    void pop() {
+        stack_x.pop();
+        min_stack.pop();
+    }
+    
+    int top() {
+        return stack_x.top();
+    }
+    
+    int min() {
+        return min_stack.top();
+    }
+};
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * MinStack* obj = new MinStack();
+ * obj->push(x);
+ * obj->pop();
+ * int param_3 = obj->top();
+ * int param_4 = obj->min();
+ */
+ ```
+![avatar](https://assets.leetcode-cn.com/solution-static/jianzhi_30/jianzhi_30.gif)
+当一个元素要入栈时，我们取当前辅助栈的栈顶存储的最小值，与当前元素比较得出最小值，将这个最小值插入辅助栈中；
+
+当一个元素要出栈时，我们把辅助栈的栈顶元素也一并弹出；
+
+在任意一个时刻，栈内元素的最小值就存储在辅助栈的栈顶元素中。
+
+
+```  min_stack.push(::min (min_stack.top(), x));```min因为下面重写了，不会调用系统的min函数,所以::min
+
+# 2.28
+### 剑指 Offer 06. 从尾到头打印链表
+输入一个链表的头节点，从尾到头反过来返回每个节点的值（用数组返回）。
+```
+输入：head = [1,3,2]
+输出：[2,3,1]
+```
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> reversePrint(ListNode* head) {
+        stack<int> stack;
+        while(head){
+            stack.push(head->val);
+            head = head->next;
+        }
+        vector<int> res;
+        while(!stack.empty()){
+            res.push_back(stack.top());
+            stack.pop();
+        }
+        return res;
+    }
+};
+```
+简单题 复习链表，数组的用法
+链表ListNode
+
+### 剑指 Offer 24. 反转链表
+定义一个函数，输入一个链表的头节点，反转该链表并输出反转后链表的头节点。
+```
+输入: 1->2->3->4->5->NULL
+输出: 5->4->3->2->1->NULL
+```
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode *cur = NULL;
+        while(head !=nullptr)
+        {
+            ListNode *temp = head -> next;
+            head -> next = cur;
+            cur = head;
+            head = temp;
+        }
+        return cur;
+    }
+};
+```
+反转指针
+let temp = head.next 用temp存一下当前的head.next
+![avatar](https://pic.leetcode.cn/1677407706-mvBIfw-IMG_1164(20230226-182903).PNG)
+head.next = prev 把当前的head.next指向prev
+![avatar](https://pic.leetcode.cn/1677407770-AcceIJ-IMG_1166(20230226-183036).PNG)
+prev = head prev右移到新的头，即现在的head的位置。
+![avatar](https://pic.leetcode.cn/1677407926-SDtwyk-IMG_1167(20230226-183227).PNG)
+
+### 剑指 Offer 35. 复杂链表的复制（哈希表 / 拼接与拆分，清晰图解
+请实现 copyRandomList 函数，复制一个复杂链表。在复杂链表中，每个节点除了有一个 next 指针指向下一个节点，还有一个 random 指针指向链表中的任意节点或者 null。
+```c++
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        if(head == nullptr) return nullptr;
+        Node* cur = head;
+        unordered_map<Node*, Node*> map;
+        // 3. 复制各节点，并建立 “原节点 -> 新节点” 的 Map 映射
+        while(cur != nullptr) {
+            map[cur] = new Node(cur->val);
+            cur = cur->next;
+        }
+        cur = head;
+        // 4. 构建新链表的 next 和 random 指向
+        while(cur != nullptr) {
+            map[cur]->next = map[cur->next];
+            map[cur]->random = map[cur->random];
+            cur = cur->next;
+        }
+        // 5. 返回新链表的头节点
+        return map[head];
+    }
+};
+
+```
+
+# 3.5
+### 剑指 Offer 53 - I. 在排序数组中查找数字 I
+
+统计一个数字在排序数组中出现的次数。
+
+ 
+
+```示例 1:
+
+输入: nums = [5,7,7,8,8,10], target = 8
+输出: 2
+示例 2:
+
+输入: nums = [5,7,7,8,8,10], target = 6
+输出: 0
+```
+```c++
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        int res = 0;
+        for (int i = 0;i<nums.size();i++){
+            if(nums[i] == target){
+                res++;
+            }
+        }
+        return res;
+    }
+};
+```
+太简单 复杂度O(N);
+使用二分法 复杂度O(logN)
+```c++
+class Solution {
+public:
+
+    int search(vector<int>& nums, int target) {
+        int left =0,right = nums.size()-1;
+        int count = 0;
+        while(left<right){
+            int mid = (left+right)/2;
+            if(nums[mid]>=target)
+                right=mid;
+            if(nums[mid]<target)
+                left = mid+1;
+        }
+        while(left<nums.size()&&nums[left++]==target)
+            count++;
+        return count;
+    }
+    
+};
+```
+有序数组的一些操作都应该先考虑二分法O(logn) 而不是遍历O(N)
+
+# 3.6 查找算法 2
+### 剑指 Offer 04. 二维数组中的查找
+```
+在一个 n * m 的二维数组中，每一行都按照从左到右 非递减 的顺序排序，每一列都按照从上到下 非递减 的顺序排序。请完成一个高效的函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。
+
+ 
+
+示例:
+
+现有矩阵 matrix 如下：
+
+[
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+]
+给定 target = 5，返回 true。
+
+给定 target = 20，返回 false。
+```
+```c++
+class Solution {
+public:
+    bool findNumberIn2DArray(vector<vector<int>>& matrix, int target) {
+        if (matrix.size() == 0 || matrix[0].size() == 0) return false;
+        int m = matrix.size(), n = matrix[0].size();
+        int x = 0, y = n - 1;
+        while (x < m && y >= 0) {
+            if (matrix[x][y] == target) {
+                return true;
+            }
+            if (matrix[x][y] > target) {
+                --y;
+            }
+            else {
+                ++x;
+            }
+        }
+        return false;
+    }
+};
+
+```
+Z 字形查找
+
+### 剑指 Offer 50. 第一个只出现一次的字符
+在字符串 s 中找出第一个只出现一次的字符。如果没有，返回一个单空格。 s 只包含小写字母
+```
+示例 1:
+输入：s = "abaccdeff"
+输出：'b'
+示例 2:
+输入：s = "" 
+输出：' '
+```
+```c++
+class Solution {
+public:
+    int minArray(vector<int>& numbers) {
+        int low = 0;
+        int high = numbers.size() - 1;
+        while (low < high) {
+            int pivot = low + (high - low) / 2;
+            if (numbers[pivot] < numbers[high]) {
+                high = pivot;
+            }
+            else if (numbers[pivot] > numbers[high]) {
+                low = pivot + 1;
+            }
+            else {
+                high -= 1;
+            }
+        }
+        return numbers[low];
+    }
+};
+```
+熟悉哈希表操作
+
+# 3.7 搜索与回溯算法
+### 剑指 Offer 32 - I. 从上到下打印二叉树
+从上到下打印出二叉树的每个节点，同一层的节点按照从左到右的顺序打印。
+==层序遍历 BFS==
+```
+例如:
+给定二叉树: [3,9,20,null,null,15,7],
+
+    3
+   / \
+  9  20
+    /  \
+   15   7
+返回：
+
+[3,9,20,15,7]
+
+```
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> levelOrder(TreeNode* root) {
+        vector<int> vec;
+        if (root == NULL) { // 初始判空处理
+            return vec;
+        }
+
+        queue<TreeNode*> que; // 创建队列
+        que.push(root); // 加入根节点
+
+        while (!que.empty()) { // 循环队列不为空
+            TreeNode* temp = que.front(); // 队首
+            que.pop(); // 弹出队首
+            if (temp->left) { // 不为空就入队
+                que.push(temp->left);
+            }
+            if (temp->right) {
+                que.push(temp->right);
+            }
+            vec.push_back(temp->val);
+        }
+        return vec;
+    }
+};
+```
+# 3.14 
+### 剑指 Offer 26. 树的子结构
+```
+输入两棵二叉树A和B，判断B是不是A的子结构。(约定空树不是任意一个树的子结构)
+
+B是A的子结构， 即 A中有出现和B相同的结构和节点值。
+
+例如:
+给定的树 A:
+
+     3
+    / \
+   4   5
+  / \
+ 1   2
+给定的树 B：
+
+   4 
+  /
+ 1
+返回 true，因为 B 与 A 的一个子树拥有相同的结构和节点值。
+
+示例 1：
+
+输入：A = [1,2,3], B = [3,1]
+输出：false
+示例 2：
+
+输入：A = [3,4,5,1,2], B = [4,1]
+输出：true
+```
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool isSubStructure(TreeNode* A, TreeNode* B) {
+        if(A == NULL || B == NULL) return false;
+        return compare(A,B)||isSubStructure(A->left,B)||isSubStructure(A->right,B);
+    }
+
+    bool compare(TreeNode* A , TreeNode* B){
+        if(B == NULL) return true;
+        if(A == NULL) return false;
+        return A->val == B->val && compare(A->left,B->left)&&compare(A->right,B->right);
+    }
+};
+```
+先序遍历 + 包含判断
+
+# 3.15 搜索与回溯算法
+### 剑指 Offer 27. 二叉树的镜像
+请完成一个函数，输入一个二叉树，该函数输出它的镜像。
+```
+例如输入：
+
+     4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+镜像输出：
+
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+```
+ 
+
+示例 1：
+
+输入：root = [4,2,7,1,3,6,9]
+输出：[4,7,2,9,6,3,1]
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* mirrorTree(TreeNode* root) {
+if (root == nullptr) return nullptr;
+        TreeNode* tmp = root->left;
+        root->left = mirrorTree(root->right);
+        root->right = mirrorTree(tmp);
+        return root;
+    }
+};
+```
+这是一道很经典的二叉树问题。显然，我们从根节点开始，递归地对树进行遍历，并从叶子节点先开始翻转得到镜像。如果当前遍历到的节点 root 的左右两棵子树都已经翻转得到镜像，那么我们只需要交换两棵子树的位置，即可得到以 root 为根节点的整棵子树的镜像。
+
+# 3.19
+### 剑指 Offer 10- II. 青蛙跳台阶问题
+```
+一只青蛙一次可以跳上1级台阶，也可以跳上2级台阶。求该青蛙跳上一个 n 级的台阶总共有多少种跳法。
+
+答案需要取模 1e9+7（1000000007），如计算初始结果为：1000000008，请返回 1。
+
+示例 1：
+
+输入：n = 2
+输出：2
+示例 2：
+
+输入：n = 7
+输出：21
+示例 3：
+
+输入：n = 0
+输出：1
+```
+```c++
+class Solution {
+public:
+    int numWays(int n) {
+        int a = 0, b = 1 , sum = 0;
+        for (int i = 0; i<=n; i++){
+            sum = (a + b) % 1000000007;
+            a = b;
+            b = sum;
+        }
+        return a;
+    }
+};
+```
+<img src="D:\work\笔记\剑指offer\屏幕截图 2023-03-19 135638.png">
+
+vector for循环可以
+```c++
+vector<int> vector;
+for(int i : vector){
+    cout<< i;//i是vector[i]
+}
+
+for (declaration : expression){
+    //循环体
+}
+```
+其中，两个参数各自的含义如下：
+declaration：表示此处要定义一个变量，该变量的类型为要遍历序列中存储元素的类型。需要注意的是，C++ 11 标准中，declaration参数处定义的变量类型可以用 auto 关键字表示，该关键字可以使编译器自行推导该变量的数据类型。
+expression：表示要遍历的序列，常见的可以为事先定义好的普通数组或者容器，还可以是用 {} 大括号初始化的序列。
+
+###剑指 Offer 42. 连续子数组的最大和
+```
+输入一个整型数组，数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。
+
+要求时间复杂度为O(n)。
+
+示例1:
+
+输入: nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出: 6
+解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
+
+```
+```c++
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        int maxSum = nums[0], tempSum = 0;
+        for(int num:nums){
+            tempSum += num;
+            tempSum = max(tempSum,num);
+            if(tempSum>maxSum) maxSum = tempSum;
+        } 
+        return maxSum;
+    }
+};
+```
+==动态规划思想==
+f(i) = max( f(i-1)+nums[i] , nums[i])
+动态规划就是找此项与上一项的关系
+
+### 剑指 Offer 47. 礼物的最大价值
+在一个 m*n 的棋盘的每一格都放有一个礼物，每个礼物都有一定的价值（价值大于 0）。你可以从棋盘的左上角开始拿格子里的礼物，并每次向右或者向下移动一格、直到到达棋盘的右下角。给定一个棋盘及其上面的礼物的价值，请计算你最多能拿到多少价值的礼物？
+
+```
+输入: 
+[
+  [1,3,1],
+  [1,5,1],
+  [4,2,1]
+]
+输出: 12
+解释: 路径 1→3→5→2→1 可以拿到最多价值的礼物
+```
+<img src="D:\work\笔记\剑指offer\屏幕截图 2023-03-19 201740.png">
+
+```c++
+class Solution {
+public:
+    int maxValue(vector<vector<int>>& grid) {
+        int m = grid.size(), n = grid[0].size();
+        vector<vector<int>> f(m, vector<int>(n));
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (i > 0) {
+                    f[i][j] = max(f[i][j], f[i - 1][j]);
+                }
+                if (j > 0) {
+                    f[i][j] = max(f[i][j], f[i][j - 1]);
+                }
+                f[i][j] += grid[i][j];
+            }
+        }
+        return f[m - 1][n - 1];
+    }
+};
+```
+注意到状态转移方程中，f(i,j)只会从f(i−1,j)和f(i,j−1)转移而来，而与f(i−2,⋯) 以及更早的状态无关，因此我们同一时刻只需要存储最后两行的状态，即使用两个长度为n的一位数组代替m×n的二维数组f，交替地进行状态转移，减少空间复杂度
+
+```c++
+class Solution {
+public:
+    int maxValue(vector<vector<int>>& grid) {
+        int m = grid.size(), n = grid[0].size();
+        vector<vector<int>> f(2, vector<int>(n));
+        for (int i = 0; i < m; ++i) {
+            int pos = i % 2;
+            for (int j = 0; j < n; ++j) {
+                f[pos][j] = 0;
+                if (i > 0) {
+                    f[pos][j] = max(f[pos][j], f[1 - pos][j]);
+                }
+                if (j > 0) {
+                    f[pos][j] = max(f[pos][j], f[pos][j - 1]);
+                }
+                f[pos][j] += grid[i][j];
+            }
+        }
+        return f[(m - 1) % 2][n - 1];
+    }
+};
+```
