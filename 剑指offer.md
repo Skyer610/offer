@@ -839,3 +839,79 @@ public:
 ==巧妙解法==
 双指针
 快慢指针的思想，第一个指针指向head 第二个指针指向第k-1个，两个指针同时向后遍历，到第二个指针指向最后一个，第一个指针也就指向倒数第k个了
+
+### 剑指 Offer 25. 合并两个排序的链表
+输入两个递增排序的链表，合并这两个链表并使新链表中的节点仍然是递增排序的。
+```
+输入：1->2->4, 1->3->4
+输出：1->1->2->3->4->4
+```
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+        ListNode* prehead = new ListNode(-1);
+        ListNode* prev = prehead;
+        while(l1 != NULL && l2 != NULL){
+            if(l1->val <= l2->val){
+                prev->next = l1;
+                l1 = l1->next;
+            }
+            else{
+                prev->next = l2;
+                l2 = l2->next;
+            }
+            prev = prev->next;
+        }
+        prev->next = l1 == NULL? l2:l1;
+        return prehead->next;
+    }
+};
+```
+![avatar](https://assets.leetcode-cn.com/solution-static/jianzhi_25/19.PNG)
+我们设定一个哨兵节点prehead
+注意建立一个新的LIST时应该ListNode* prehead = new ListNode(-1);
+
+### 剑指 Offer 52. 两个链表的第一个公共节点
+输入两个链表，找出它们的第一个公共节点
+![avatar](https://assets.leetcode.com/uploads/2018/12/13/160_example_1.png)
+输入：intersectVal = 8, listA = [4,1,8,4,5], listB = [5,0,1,8,4,5], skipA = 2, skipB = 3
+输出：Reference of the node with value = 8
+输入解释：相交节点的值为 8 （注意，如果两个列表相交则不能为 0）。从各自的表头开始算起，链表 A 为 [4,1,8,4,5]，链表 B 为 [5,0,1,8,4,5]。在 A 中，相交节点前有 2 个节点；在 B 中，相交节点前有 3 个节点。
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        if (headA == nullptr || headB == nullptr) {
+            return nullptr;
+        }
+        ListNode* pA = headA;
+        ListNode* pB = headB;
+        while(pA != pB){
+            if(pA != NULL) pA = pA->next;
+            else pA = headB;
+            if(pB != NULL) pB = pB->next;
+            else pB = headA;
+        }
+        return pA;
+    }
+};
+```
+<img src="D:\work\笔记\剑指offer\屏幕截图 2023-03-20 215512.png">
