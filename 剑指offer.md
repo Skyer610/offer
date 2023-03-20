@@ -183,15 +183,15 @@ public:
 class Solution {
 public:
     ListNode* reverseList(ListNode* head) {
-        ListNode *cur = NULL;
+        ListNode *prev = NULL;
         while(head !=nullptr)
         {
             ListNode *temp = head -> next;
-            head -> next = cur;
-            cur = head;
+            head -> next = prev;
+            prev = head;
             head = temp;
         }
-        return cur;
+        return prev;
     }
 };
 ```
@@ -702,6 +702,140 @@ public:
     }
 };
 ```
-判断字符串的大小可以直接用 > , < 符号，
+判断字符串的大小可以直接用 > , < 符号，根据字典顺序
 状态转移方程 f(i) = f(i-1)+f(i-2) (i-1 与 i-2 组合应该小于25并且==大于10==)
 如果不满足上述条件 f(i) = f(i-1)
+
+# 3.20
+### 剑指 Offer 48. 最长不含重复字符的子字符串
+请从字符串中找出一个最长的不包含重复字符的子字符串，计算该最长子字符串的长度。
+```
+示例 1:
+
+输入: "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
+示例 2:
+
+输入: "bbbbb"
+输出: 1
+解释: 因为无重复字符的最长子串是 "b"，所以其长度为 1。
+示例 3:
+
+输入: "pwwkew"
+输出: 3
+解释: 因为无重复字符的最长子串是 "wke"，所以其长度为 3。
+     请注意，你的答案必须是 子串 的长度，"pwke" 是一个子序列，不是子串。
+
+```
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        // 哈希集合，记录每个字符是否出现过
+        unordered_set<char> occ;
+        int n = s.size();
+        // 右指针，初始值为 -1，相当于我们在字符串的左边界的左侧，还没有开始移动
+        int rk = -1, ans = 0;
+        // 枚举左指针的位置，初始值隐性地表示为 -1
+        for (int i = 0; i < n; ++i) {
+            if (i != 0) {
+                // 左指针向右移动一格，移除一个字符
+                occ.erase(s[i - 1]);
+            }
+            while (rk + 1 < n && !occ.count(s[rk + 1])) {
+                // 不断地移动右指针
+                occ.insert(s[rk + 1]);
+                ++rk;
+            }
+            // 第 i 到 rk 个字符是一个极长的无重复字符子串
+            ans = max(ans, rk - i + 1);
+        }
+        return ans;
+    }
+};
+```
+判断是否重复首选哈希表，熟悉哈希表操作
+
+### 剑指 Offer 18. 删除链表的节点
+给定单向链表的头指针和一个要删除的节点的值，定义一个函数删除该节点。
+返回删除后的链表的头节点。
+```
+输入: head = [4,5,1,9], val = 5
+输出: [4,1,9]
+解释: 给定你链表中值为 5 的第二个节点，那么在调用了你的函数之后，该链表应变为 4 -> 1 -> 9.
+```
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* deleteNode(ListNode* head, int val) {
+        ListNode* cur = head->next;
+        ListNode* pre = head;
+        if(head->val == val) {
+            head = head->next;
+            return head;
+        }
+        while(cur->val != val){
+            cur = cur->next;
+            pre = pre->next;
+        }
+        pre->next = cur->next;
+        return head;
+    }
+};
+```
+注意 赋值        
+ListNode* cur = head->next;
+ListNode* pre = head;
+改变cur pre指向，对应head作为头节点也会改
+如果想创建一个新list 应该用new list
+
+### 剑指 Offer 22. 链表中倒数第k个节点
+
+输入一个链表，输出该链表中倒数第k个节点。为了符合大多数人的习惯，本题从1开始计数，即链表的尾节点是倒数第1个节点。
+
+例如，一个链表有 6 个节点，从头节点开始，它们的值依次是 1、2、3、4、5、6。这个链表的倒数第 3 个节点是值为 4 的节点。
+
+ 
+
+示例：
+```
+给定一个链表: 1->2->3->4->5, 和 k = 2.
+
+返回链表 4->5.
+```
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* getKthFromEnd(ListNode* head, int k) {
+        ListNode* temp = head;
+        for(int i = 0; i<k-1; i++){
+            temp = temp->next;
+        }
+        while(temp->next != NULL){
+            temp = temp->next;
+            head = head->next;
+        }
+        return head;
+    }
+};
+```
+==巧妙解法==
+双指针
+快慢指针的思想，第一个指针指向head 第二个指针指向第k-1个，两个指针同时向后遍历，到第二个指针指向最后一个，第一个指针也就指向倒数第k个了
