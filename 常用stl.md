@@ -43,7 +43,17 @@ vector.insert(); //在指定位置插入元素
 vector.erase(); //在指定位置删除元素
 
 vector.clear(); //清空容器
+
+swap(a[1],a[2]);//交换两个数组
 ```
+
+vector.begin()返回的的是向量的头指针，指向第一个元素
+```c++
+vector<int>a={1,0};
+vector<int>::iterator iter=a.begin();
+cout<<*iter;  //输出1
+```
+
 
 ## queue常用函数
 queue是一种容器转换器模板，调用#include<queue>即可使用队列类。
@@ -210,3 +220,4 @@ mp[key] = xxx：如果mp中找不到对应的key则将键值对(key：xxx)插入
 
 unordered的作用：
 set和map都可以在前面加上unorder_使得内部的元素改成不按顺序存储的，其余的功能都不改变，虽然无法顺序存储，但底层原理是hash，可以使得所有的查询、修改、删除操作都变成O(1)复杂度
+
