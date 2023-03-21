@@ -915,3 +915,118 @@ public:
 };
 ```
 <img src="D:\work\笔记\剑指offer\屏幕截图 2023-03-20 215512.png">
+# 3.21
+### 剑指 Offer 57. 和为s的两个数字
+输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，则输出任意一对即可。
+```
+输入：nums = [2,7,11,15], target = 9
+输出：[2,7] 或者 [7,2]
+```
+双指针，因为数组中元素是增序的，则可采用两端逼近原则
+i与j分别为左右两个指针
+1.下标为i、j的两元素和等于target，则下表为i、j的元素就是所找数
+2.下标为i、j的两元素和小于target，则i++
+3.下标为i、j的两元素和大于target，则j--
+```c++
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        int left = 0, right = nums.size()-1;
+        vector<int> res;
+        while(left < right){
+            if(nums[left] + nums[right] > target) right--;
+            else if(nums[left] + nums[right] < target) left++;
+            else {
+                res = {nums[left],nums[right]};
+                return res;
+            }
+        }
+        return res;
+    }
+};
+```
+### 剑指 Offer 58 - I. 翻转单词顺序
+输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。为简单起见，标点符号和普通字母一样处理。例如输入字符串"I am a student. "，则输出"student. a am I"。
+```
+示例 1：
+
+输入: "the sky is blue"
+输出: "blue is sky the"
+示例 2：
+
+输入: "  hello world!  "
+输出: "world! hello"
+解释: 输入字符串可以在前面或者后面包含多余的空格，但是反转后的字符不能包括。
+示例 3：
+
+输入: "a good   example"
+输出: "example good a"
+解释: 如果两个单词间有多余的空格，将反转后单词间的空格减少到只含一个。
+```
+```c++
+class Solution {
+public:
+    string reverseWords(string s) {
+        reverse(s.begin(),s.end());
+        string res,temp;
+        int i = 0;
+        while(i < s.size()){
+            if(s[i] == ' ') {
+                i++;
+                continue;
+            }
+            while(s[i] != ' '&& i < s.size()){
+                temp += s[i];
+                i++;
+            }
+            reverse(temp.begin(),temp.end());
+            if(!res.empty())res+=' ';
+            res+=temp;
+            temp.clear();
+
+            i++;
+        }
+        return res;
+    }
+};
+```
+![avatar](https://assets.leetcode-cn.com/solution-static/jianzhi_58_I/reverse_whole2.png)
+先直接倒转之后再每个单词再反一次
+
+### 剑指 Offer 12. 矩阵中的路径
+给定一个 m x n 二维字符网格 board 和一个字符串单词 word 。如果 word 存在于网格中，返回 true ；否则，返回 false 。
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+例如，在下面的 3×4 的矩阵中包含单词 "ABCCED"（单词中的字母已标出）。
+![avatar](https://assets.leetcode.com/uploads/2020/11/04/word2.jpg)
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
+输出：true
+
+```c++
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        rows = board.size();
+        cols = board[0].size();
+        for(int i = 0; i < rows; i++) {
+            for(int j = 0; j < cols; j++) {
+                if(dfs(board, word, i, j, 0)) return true;
+            }
+        }
+        return false;
+    }
+private:
+    int rows, cols;
+    bool dfs(vector<vector<char>>& board, string word, int i, int j, int k) {
+        if(i >= rows || i < 0 || j >= cols || j < 0 || board[i][j] != word[k]) return false;
+        if(k == word.size() - 1) return true;
+        board[i][j] = '\0';
+        bool res = dfs(board, word, i + 1, j, k + 1) || dfs(board, word, i - 1, j, k + 1) || 
+                      dfs(board, word, i, j + 1, k + 1) || dfs(board, word, i , j - 1, k + 1);
+        board[i][j] = word[k];
+        return res;
+    }
+};
+
+```
+dfs
