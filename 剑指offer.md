@@ -915,6 +915,7 @@ public:
 };
 ```
 <img src="D:\work\笔记\剑指offer\屏幕截图 2023-03-20 215512.png">
+
 # 3.21
 ### 剑指 Offer 57. 和为s的两个数字
 输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，则输出任意一对即可。
@@ -963,6 +964,7 @@ public:
 输出: "example good a"
 解释: 如果两个单词间有多余的空格，将反转后单词间的空格减少到只含一个。
 ```
+
 ```c++
 class Solution {
 public:
@@ -990,6 +992,7 @@ public:
     }
 };
 ```
+
 ![avatar](https://assets.leetcode-cn.com/solution-static/jianzhi_58_I/reverse_whole2.png)
 先直接倒转之后再每个单词再反一次
 
@@ -1029,4 +1032,288 @@ private:
 };
 
 ```
-dfs
+dfs深度优先遍历
+
+### 面试题13. 机器人的运动范围
+广度优先算法
+地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+
+示例 1：
+输入：m = 2, n = 3, k = 1
+输出：3
+![avatar](https://pic.leetcode-cn.com/1603024999-XMpudY-Picture9.png)
+
+数位和增量公式：设x的数位和为sx
+当(x+1)%10 = 0时，sx+1 = sx - 8; 19,20的数位和为10和2；
+当(x+1)%10 ！= 时，sx+1 = sx +1; 18,19的数位和为9和10。
+
+#### 方法一：深度优先遍历 DFS
+深度优先搜索： 可以理解为暴力法模拟机器人在矩阵中的所有路径。DFS 通过递归，先朝一个方向搜到底，再回溯至上个节点，沿另一个方向搜索，以此类推。
+剪枝： 在搜索中，遇到数位和超出目标值、此元素已访问，则应立即返回，称之为 可行性剪枝 。
+算法解析：
+递归参数： 当前元素在矩阵中的行列索引 i 和 j ，两者的数位和 si, sj 。
+终止条件： 当 ① 行列索引越界 或 ② 数位和超出目标值 k 或 ③ 当前元素已访问过 时，返回 
+0 ，代表不计入可达解。
+递推工作：
+1. 标记当前单元格 ：将索引 (i, j) 存入 Set visited 中，代表此单元格已被访问过。
+2. 搜索下一单元格： 计算当前元素的 下、右 两个方向元素的数位和，并开启下层递归 。
+回溯返回值： 返回 1 + 右方搜索的可达解总数 + 下方搜索的可达解总数，代表从本单元格递归搜索的可达解总数。
+
+```c++
+class Solution {
+public:
+    int movingCount(int m, int n, int k) {
+        vector<vector<bool>> visited(m, vector<bool>(n, 0));
+        return dfs(0, 0, 0, 0, visited, m, n, k);
+    }
+private:
+    int dfs(int i, int j, int si, int sj, vector<vector<bool>> &visited, int m, int n, int k) {
+        if(i >= m || j >= n || k < si + sj || visited[i][j]) return 0;
+        visited[i][j] = true;
+        return 1 + dfs(i + 1, j, (i + 1) % 10 != 0 ? si + 1 : si - 8, sj, visited, m, n, k) +
+                   dfs(i, j + 1, si, (j + 1) % 10 != 0 ? sj + 1 : sj - 8, visited, m, n, k);
+    }
+};
+```
+#### 方法二：广度优先遍历 BFS
+BFS/DFS ： 两者目标都是遍历整个矩阵，不同点在于搜索顺序不同。DFS 是朝一个方向走到底，再回退，以此类推；BFS 则是按照“平推”的方式向前搜索。
+BFS 实现： 通常利用队列实现广度优先遍历。
+算法解析：
+初始化： 将机器人初始点(0,0) 加入队列 queue ；
+迭代终止条件： queue 为空。代表已遍历完所有可达解。
+迭代工作：
+1. 单元格出队： 将队首单元格的 索引、数位和 弹出，作为当前搜索单元格。
+2. 判断是否跳过： 若 ① 行列索引越界 或 ② 数位和超出目标值 k 或 ③ 当前元素已访问过 时，执行 continue 。
+3. 标记当前单元格 ：将单元格索引 (i, j) 存入 Set visited 中，代表此单元格 已被访问过 。
+4. 单元格入队： 将当前元素的 下方、右方 单元格的 索引、数位和 加入 queue 。
+返回值： Set visited 的长度 len(visited) ，即可达解的数量。
+```c++
+class Solution {
+public:
+    int movingCount(int m, int n, int k) {
+        vector<vector<bool>> visited(m, vector<bool>(n, 0));
+        int res = 0;
+        queue<vector<int>> que;
+        que.push({ 0, 0, 0, 0 });
+        while(que.size() > 0) {
+            vector<int> x = que.front();
+            que.pop();
+            int i = x[0], j = x[1], si = x[2], sj = x[3];
+            if(i >= m || j >= n || k < si + sj || visited[i][j]) continue;
+            visited[i][j] = true;
+            res++;
+            que.push({ i + 1, j, (i + 1) % 10 != 0 ? si + 1 : si - 8, sj });
+            que.push({ i, j + 1, si, (j + 1) % 10 != 0 ? sj + 1 : sj - 8 });
+        }
+        return res;
+    }
+};
+```
+
+# 3.23 
+### 剑指 Offer 34. 二叉树中和为某一值的路径
+给你二叉树的根节点 root 和一个整数目标和 targetSum ，找出所有 从根节点到叶子节点 路径总和等于给定目标和的路径。
+叶子节点 是指没有子节点的节点。
+![avatar](https://assets.leetcode.com/uploads/2021/01/18/pathsumii1.jpg)
+输入：root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22
+输出：[[5,4,11,2],[5,8,4,5]]
+
+深度优先遍历
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> res;
+    vector<int> path;
+    vector<vector<int>> pathSum(TreeNode* root, int target) {
+        dfs(root, target);
+        return res;
+    }
+    void dfs(TreeNode* root, int target){
+        if(root == nullptr) return;
+        target -= root->val;
+        path.emplace_back(root->val);
+        if(root->left == nullptr && root->right == nullptr && target == 0) {
+            res.emplace_back(path);
+        }
+            dfs(root->left,target);
+            dfs(root->right,target); 
+            path.pop_back();
+    }
+};
+```
+算法流程：
+pathSum(root, sum) 函数：
+
+初始化： 结果列表 res ，路径列表 path 。
+返回值： 返回 res 即可。
+recur(root, tar) 函数：
+
+递推参数： 当前节点 root ，当前目标值 tar 。
+终止条件： 若节点 root 为空，则直接返回。
+递推工作：
+1. 路径更新： 将当前节点值 root.val 加入路径 path ；
+2. 目标值更新： tar = tar - root.val（即目标值 tar 从 sum 减至0）；
+3. 路径记录： 当 ① root 为叶节点 且 ② 路径和等于目标值 ，则将此路径 path 加入 res 。
+4. 先序遍历： 递归左 / 右子节点。
+5. ==路径恢复==： 向上回溯前，需要将当前节点从路径 path 中删除，即执行 path.pop()
+
+### 剑指 Offer 36. 二叉搜索树与双向链表
+输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的循环双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。
+==二叉搜索树==： 左节点<根节点<右节点
+为了让您更好地理解问题，以下面的二叉搜索树为例：
+![avatar](https://assets.leetcode.com/uploads/2018/10/12/bstdlloriginalbst.png)
+我们希望将这个二叉搜索树转化为双向循环链表。链表中的每个节点都有一个前驱和后继指针。对于双向循环链表，第一个节点的前驱是最后一个节点，最后一个节点的后继是第一个节点。
+下图展示了上面的二叉搜索树转化成的链表。“head” 表示指向链表中有最小元素的节点。
+![avator](https://assets.leetcode.com/uploads/2018/10/12/bstdllreturndll.png)
+特别地，我们希望可以就地完成转换操作。当转化完成以后，树中节点的左指针需要指向前驱，树中节点的右指针需要指向后继。还需要返回链表中的第一个节点的指针。
+
+==中序遍历==
+![avatar](https://pic.leetcode-cn.com/1599401091-PKIjds-Picture1.png)
+中序遍历 为对二叉树作 “左、根、右” 顺序遍历，递归实现如下：
+```c++
+// 打印中序遍历
+void dfs(Node* root) {
+    if(root == nullptr) return;
+    dfs(root->left); // 左
+    cout << root->val << endl; // 根
+    dfs(root->right); // 右
+}
+```
+算法流程：
+dfs(cur): 递归法中序遍历；
+1. 终止条件： 当节点 cur 为空，代表越过叶节点，直接返回；
+2. 递归左子树，即 dfs(cur.left) ；
+3. 构建链表：
+ 3.1 当 pre 为空时： 代表正在访问链表头节点，记为 head ；
+ 3.2 当 pre 不为空时： 修改双向节点引用，即 pre.right = cur ， cur.left = pre ；
+ 3.3 保存 cur ： 更新 pre = cur ，即节点 cur 是后继节点的 pre ；
+4. 递归右子树，即 dfs(cur.right) ；
+treeToDoublyList(root)：
+1. 特例处理： 若节点 root 为空，则直接返回；
+2. 初始化： 空节点 pre ；
+3. 转化为双向链表： 调用 dfs(root) ；
+4. 构建循环链表： 中序遍历完成后，head 指向头节点， pre 指向尾节点，因此修改 head 和 pre 的双向节点引用即可；
+5. 返回值： 返回链表的头节点 head 即可；
+![avatar](https://pic.leetcode-cn.com/1599402776-WMHCrE-Picture7.png)
+
+```c++
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    Node* left;
+    Node* right;
+
+    Node() {}
+
+    Node(int _val) {
+        val = _val;
+        left = NULL;
+        right = NULL;
+    }
+
+    Node(int _val, Node* _left, Node* _right) {
+        val = _val;
+        left = _left;
+        right = _right;
+    }
+};
+*/
+class Solution {
+public:
+    Node* treeToDoublyList(Node* root) {
+    if (root == nullptr) return nullptr;
+    dfs(root);
+    head->left = pre;
+    pre->right = head;
+    return head;    
+    }
+    Node *pre,*head;
+    void dfs(Node* cur){
+        if(cur == nullptr) return;
+        dfs(cur->left);
+        if(pre != nullptr) pre->right = cur;
+        else head = cur;
+        cur->left = pre;
+        //cout<<cur-val<<endl;
+        pre = cur;
+        dfs(cur->right);
+    }
+};
+```
+
+# ==快速排序==（熟记全文并背诵）
+```c++
+class Solution {
+public:
+    vector<int> sortArray(vector<int>& nums) {
+        int left = 0, right = nums.size()-1;
+        quicksort(nums,left,right);
+        return nums;
+    }
+    void quicksort(vector<int>& nums, int begin, int end){
+        if(begin>=end) return; 
+        int left = begin, right = end;
+        int temp = nums[left];
+        while(left<right){
+            while(left<right && temp <= nums[right]) right--;
+            nums[left] = nums[right];
+            while(left<right && temp >= nums[left]) left++;
+            nums[right] = nums[left];
+
+        }
+        nums[left] = temp;
+        quicksort(nums,begin,left-1);
+        quicksort(nums,left+1,end);
+    }
+};
+```
+
+## 随机快速排序
+```c++
+    int partition(vector<int>& nums, int l, int r) {
+        int pivot = nums[r];
+        int i = l - 1;
+        for (int j = l; j <= r - 1; ++j) {
+            if (nums[j] <= pivot) {
+                i = i + 1;
+                swap(nums[i], nums[j]);
+            }
+        }
+        swap(nums[i + 1], nums[r]);
+        return i + 1;
+    }
+    int randomized_partition(vector<int>& nums, int l, int r) {
+        int i = rand() % (r - l + 1) + l; // 随机选一个作为我们的主元
+        swap(nums[r], nums[i]);
+        return partition(nums, l, r);
+    }
+    void randomized_quicksort(vector<int>& nums, int l, int r) {
+        if (l < r) {
+            int pos = randomized_partition(nums, l, r);
+            randomized_quicksort(nums, l, pos - 1);
+            randomized_quicksort(nums, pos + 1, r);
+        }
+    }
+public:
+    vector<int> sortArray(vector<int>& nums) {
+        srand((unsigned)time(NULL));
+        randomized_quicksort(nums, 0, (int)nums.size() - 1);
+        return nums;
+    }
+};
+
+```
+

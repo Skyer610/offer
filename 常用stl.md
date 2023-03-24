@@ -181,16 +181,13 @@ map的底层实现原理与set一样都是红黑树。
 
 
 建立方法：
-```
+
 map<key,value> mp;
 unordered_map<key,value> mp;
-```
 
 遍历方法：
-```
 for(auto i:mp);
-cout<<i.first<<’ '<<i.second<<endl;
-```
+cout<<i.first<< “ ” <<i.second<<endl;
 
 map的常用函数：
 
