@@ -1316,4 +1316,71 @@ public:
 };
 
 ```
+# 3.27
+### 剑指 Offer 64. 求1+2+…+n
+求 1+2+...+n ，要求不能使用乘除法、for、while、if、else、switch、case等关键字及条件判断语句（A?B:C）
+```c++
+class Solution {
+public:
+    int sumNums(int n) {
+        n && (n += sumNums(n-1));
+        return n;
+    }
+};
+```
 
+# 3.27
+### 剑指 Offer 68 - II. 二叉树的最近公共祖先
+给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。
+
+百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”
+
+例如，给定如下二叉树:  root = [3,5,1,6,2,0,8,null,null,7,4]
+![avatar](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/15/binarytree.png)
+```c++
+输入: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+输出: 3
+解释: 节点 5 和节点 1 的最近公共祖先是节点 3。
+```
+```c++
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        vector<TreeNode*> pathQ, pathP;
+        dfs(root,p,pathQ);
+        dfs(root,q,pathP);
+        int i = 0;
+        while(i<pathP.size() &&i<pathQ.size() && pathQ[i] == pathP[i]){
+            i++;
+        }
+        return pathP[i-1];
+    }
+    void dfs(TreeNode* root,TreeNode* node, vector<TreeNode*>& path){
+        if(!root) return;
+        path.push_back(root);
+        if(root == node) return;
+        dfs(root->left,node,path);
+        dfs(root->right,node,path);
+        if(path.back() != node){
+            path.pop_back();
+        }
+    }
+};
+```
+这句话的作用是在返回时，如果当前节点不是目标节点，就把它从路径中删除，以便回溯到父节点时，不包含当前节点。具体解释如下：
+1. 如果当前节点是目标节点，直接返回，不用删除节点。
+2. 如果当前节点不是目标节点，就先把当前节点加入路径，然后递归遍历左右子树。
+3. 在返回时，如果当前节点的左右子树中包含目标节点，则路径中保存了从根节点到目标节点的路径；否则，需要把当前节点从路径中删除。
+4. 如果当前节点的左右子树中有一个包含目标节点，另一个不包含，则把包含目标节点的子树的路径保留下来，删除另一个子树的路径。
+5. 如果当前节点的左右子树都不包含目标节点，就把当前节点从路径中删除。
+6. 最终返回到根节点，路径中保存的是从根节点到目标节点的路径，可以用来找到最近公共祖先节点。
+这句话的作用是在返回时，检查当前节点是否是目标节点，如果不是，就把它从路径中删除。如果不检查，可能会把目标节点之后的节点也删除掉。这句话可以在递归回溯到父节点时调用，即在递归函数的末尾加上这段代码即可。
